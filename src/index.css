@@ -480,3 +480,64 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
 }
 
+/* Agricultural Front Page Split-Screen Layout */
+.frontpage-split-container {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 28px;
+  width: 100%;
+  align-items: start;
+}
+
+@media (max-width: 1160px) {
+  .frontpage-split-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.agri-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Compact Agricultural Dataset & Accuracy Widget */
+.agri-dataset-widget {
+  position: relative;
+  background: linear-gradient(145deg, rgba(16, 24, 39, 0.9), rgba(12, 19, 32, 0.95));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  box-shadow: 0 14px 35px -8px rgba(0, 0, 0, 0.6), 0 0 25px -8px rgba(245, 158, 11, 0.18);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.agri-dataset-widget:hover {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 18px 45px -8px rgba(0, 0, 0, 0.7), 0 0 30px -5px rgba(245, 158, 11, 0.28);
+}
+
+.agri-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: #6ee7b7;
+  letter-spacing: 0.02em;
+}
+
+.agri-stat-chip {
+  background: rgba(0, 0, 0, 0.35);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-glass);
+}
+
+

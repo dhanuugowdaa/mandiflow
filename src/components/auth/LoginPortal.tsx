@@ -11,20 +11,32 @@ import {
   KeyRound,
   ArrowRight,
   Smartphone,
-  Sparkles,
-  CheckCircle2,
   Lock,
   Activity,
   Zap,
+  Database,
+  Cpu,
+  Play,
+  RotateCw,
+  TrendingUp,
+  Sliders,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const LoginPortal: React.FC = () => {
-  const { loginUser } = useApp();
+  const {
+    loginUser,
+    datasetRunResult,
+    isRunningDataset,
+    runDatasetEngine,
+    setIsDatasetModalOpen,
+  } = useApp();
+
   const [selectedRole, setSelectedRole] = useState<UserRole>('farmer');
   const [phoneOrId, setPhoneOrId] = useState<string>('98231 44021');
   const [otpCode, setOtpCode] = useState<string>('729104');
 
-  // Phone numbers corresponding to each stakeholder persona for authentic testing
+  // Phone numbers corresponding to each stakeholder persona
   const roleDefaultCredentials: Record<UserRole, { phone: string; name: string }> = {
     farmer: { phone: '98231 44021', name: 'Rameshwar Patil' },
     mandi: { phone: '98452 19830', name: 'Sandeep Jadhav' },
@@ -39,7 +51,7 @@ export const LoginPortal: React.FC = () => {
     setPhoneOrId(roleDefaultCredentials[role].phone);
   };
 
-  // 6 Dashboards organized exactly matching the user's sketch:
+  // 6 Dashboards organized matching the user's sketch:
   // Row 1: Farmer Dashboard | Mandi Dashboard
   // Row 2: FPO Dashboard    | Truck Dashboard
   // Row 3: e-NAM Dashboard  | Admin Dashboard
@@ -111,7 +123,7 @@ export const LoginPortal: React.FC = () => {
       bgGlow: 'rgba(251, 191, 36, 0.18)',
       borderColor: 'rgba(251, 191, 36, 0.35)',
       description: 'AGMARK quality assaying parameters, multivariate ML price discovery trained on APMC dataset, and electronic bidding floor.',
-      statusTag: '📈 ML Assay Accuracy 94.8%',
+      statusTag: '📈 ML Accuracy 94.8%',
       animClass: 'anim-float-2',
     },
     {
@@ -139,6 +151,18 @@ export const LoginPortal: React.FC = () => {
     loginUser(selectedRole);
   };
 
+  const handleQuickRunDataset = async () => {
+    await runDatasetEngine({
+      algorithm: 'LINEAR_REGRESSION',
+      epochs: 150,
+      testSplitPct: 20,
+      learningRate: 0.01,
+    });
+  };
+
+  // Current dataset accuracy (dynamically updated if engine ran)
+  const currentAccuracy = datasetRunResult?.accuracyPercentage ?? 94.8;
+
   return (
     <div
       style={{
@@ -146,37 +170,37 @@ export const LoginPortal: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '36px 20px 60px 20px',
-        maxWidth: '1360px',
+        padding: '30px 20px 60px 20px',
+        maxWidth: '1440px',
         margin: '0 auto',
         width: '100%',
       }}
     >
-      {/* 1. Header: Welcome to MandiFlow + Tagline */}
-      <div style={{ textAlign: 'center', marginBottom: '36px', maxWidth: '880px', width: '100%' }}>
+      {/* 1. Header: Welcome to MandiFlow + Tagline + Agricultural Badges */}
+      <div style={{ textAlign: 'center', marginBottom: '32px', maxWidth: '960px', width: '100%' }}>
         <div
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
             background: 'rgba(16, 185, 129, 0.12)',
-            border: '1px solid rgba(52, 211, 153, 0.3)',
+            border: '1px solid rgba(52, 211, 153, 0.35)',
             padding: '6px 16px',
             borderRadius: '999px',
-            marginBottom: '14px',
+            marginBottom: '12px',
           }}
         >
           <span className="live-pulse" />
           <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#6ee7b7', letterSpacing: '0.04em' }}>
-            NATIONAL AGRICULTURAL LOGISTICS & TRADING NETWORK
+            NATIONAL AGRICULTURAL LOGISTICS & APMC MANDI INTELLIGENCE
           </span>
         </div>
 
         <h1
           style={{
-            fontSize: 'clamp(2.4rem, 4vw, 3.2rem)',
+            fontSize: 'clamp(2.4rem, 4vw, 3.4rem)',
             lineHeight: 1.15,
-            marginBottom: '10px',
+            marginBottom: '8px',
             letterSpacing: '-0.03em',
             fontWeight: 800,
           }}
@@ -188,334 +212,350 @@ export const LoginPortal: React.FC = () => {
           style={{
             fontSize: 'clamp(1.2rem, 2.2vw, 1.55rem)',
             fontWeight: 700,
-            background: 'linear-gradient(135deg, #34d399 0%, #10b981 45%, #38bdf8 100%)',
+            background: 'linear-gradient(135deg, #34d399 0%, #10b981 45%, #fbbf24 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             letterSpacing: '0.02em',
-            margin: '4px 0 16px 0',
+            margin: '2px 0 14px 0',
           }}
         >
           Your Harvest. Your Market. Your Profit.
         </p>
 
-        <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '720px', margin: '0 auto' }}>
-          Real-time cold-chain logistics, Arrhenius spoilage kinetics, e-NAM multi-variate machine learning price discovery, and Zero-Trust DPDP Act 2023 governance.
-        </p>
-      </div>
-
-      {/* 2. Top Section: 6 Dashboard Cards (matching user's sketch 2x3 layout with FEW ANIMATION) */}
-      <div style={{ width: '100%', marginBottom: '40px' }}>
+        {/* Agricultural Highlights */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '18px',
-            padding: '0 4px',
+            justifyContent: 'center',
             flexWrap: 'wrap',
             gap: '10px',
+            marginTop: '8px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                background: 'rgba(16, 185, 129, 0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-              }}
-            >
-              <Zap size={18} color="#34d399" />
-            </div>
-            <div>
-              <h2 style={{ fontSize: '1.25rem', color: '#f8fafc', fontWeight: 700, margin: 0 }}>
-                Stakeholder Portals & Interactive Dashboards
-              </h2>
-              <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                Select any dashboard card for 1-click instant launch with full mock telemetry
-              </span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              padding: '4px 12px',
-              borderRadius: '8px',
-              fontSize: '0.75rem',
-              color: '#34d399',
-              border: '1px solid rgba(52, 211, 153, 0.2)',
-            }}
-          >
-            <Activity size={14} />
-            <span>Interactive Animations Active</span>
-          </div>
-        </div>
-
-        {/* 2-Column Responsive Grid matching sketch */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-            gap: '20px',
-            width: '100%',
-          }}
-        >
-          {dashboardCards.map((card) => (
-            <div
-              key={card.role}
-              className={`frontpage-card ${card.animClass}`}
-              onClick={() => handleInstantLaunch(card.role)}
-              style={
-                {
-                  '--card-glow': card.bgGlow,
-                  '--card-accent': card.color,
-                  borderColor: card.borderColor,
-                  background: `linear-gradient(145deg, rgba(15, 23, 42, 0.88), ${card.bgGlow})`,
-                } as React.CSSProperties
-              }
-            >
-              <div>
-                {/* Card Top: Icon, Title, Badge */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div
-                      className="card-icon-box"
-                      style={{
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '12px',
-                        background: 'rgba(255, 255, 255, 0.06)',
-                        border: `1px solid ${card.color}60`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      {card.icon}
-                    </div>
-                    <div>
-                      <h3 style={{ fontSize: '1.25rem', color: '#ffffff', marginBottom: '4px', fontWeight: 700 }}>
-                        {card.title}
-                      </h3>
-                      <span
-                        className="badge"
-                        style={{
-                          background: `${card.color}15`,
-                          color: card.color,
-                          border: `1px solid ${card.color}40`,
-                          fontSize: '0.72rem',
-                          padding: '2px 8px',
-                        }}
-                      >
-                        {card.code}
-                      </span>
-                    </div>
-                  </div>
-
-                  <span
-                    style={{
-                      fontSize: '0.73rem',
-                      fontWeight: 600,
-                      color: card.color,
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      padding: '4px 8px',
-                      borderRadius: '6px',
-                      border: `1px solid ${card.color}30`,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {card.statusTag}
-                  </span>
-                </div>
-
-                {/* Persona details */}
-                <div
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.35)',
-                    padding: '10px 14px',
-                    borderRadius: '8px',
-                    marginBottom: '14px',
-                    borderLeft: `3px solid ${card.color}`,
-                  }}
-                >
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
-                    {card.personaName}
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)' }}>
-                    {card.subtitle}
-                  </div>
-                </div>
-
-                {/* Card description */}
-                <p style={{ fontSize: '0.83rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '20px' }}>
-                  {card.description}
-                </p>
-              </div>
-
-              {/* Action Button */}
-              <button
-                className="btn btn-secondary card-launch-btn"
-                style={{
-                  width: '100%',
-                  justifyContent: 'center',
-                  padding: '11px',
-                  fontSize: '0.86rem',
-                  borderColor: `${card.color}50`,
-                  color: card.color,
-                  fontWeight: 700,
-                }}
-              >
-                <span>Launch {card.title}</span>
-                <ArrowRight size={16} className="arrow-icon" />
-              </button>
-            </div>
-          ))}
+          <span className="agri-badge-tag">
+            🌾 10 Vegetable Commodities
+          </span>
+          <span className="agri-badge-tag" style={{ background: 'rgba(245, 158, 11, 0.14)', borderColor: 'rgba(245, 158, 11, 0.35)', color: '#fcd34d' }}>
+            ⚖️ 6 APMC Mandi Networks
+          </span>
+          <span className="agri-badge-tag" style={{ background: 'rgba(56, 189, 248, 0.14)', borderColor: 'rgba(56, 189, 248, 0.35)', color: '#7dd3fc' }}>
+            🚚 Reefer Cold-Chain GPS
+          </span>
+          <span className="agri-badge-tag" style={{ background: 'rgba(167, 139, 250, 0.14)', borderColor: 'rgba(167, 139, 250, 0.35)', color: '#c4b5fd' }}>
+            🛡️ Zero-Trust DPDP Act 2023
+          </span>
         </div>
       </div>
 
-      {/* 3. Bottom Section: LOG IN PAGE (Large Box matching the user's sketch) */}
-      <div style={{ width: '100%', maxWidth: '960px' }}>
-        <div className="frontpage-login-box">
+      {/* 2. Split Screen: Left (6 Animated Cards) + Right (Login & Small Dataset Widget) */}
+      <div className="frontpage-split-container">
+        
+        {/* LEFT COLUMN: 6 Agricultural Dashboard Cards */}
+        <div>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '20px',
+              marginBottom: '16px',
+              padding: '0 4px',
               flexWrap: 'wrap',
-              gap: '12px',
-              borderBottom: '1px solid var(--border-glass)',
-              paddingBottom: '16px',
+              gap: '8px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div
                 style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '12px',
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  border: '1px solid rgba(52, 211, 153, 0.4)',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: 'rgba(16, 185, 129, 0.15)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
                 }}
               >
-                <Lock size={22} color="#34d399" />
+                <Zap size={18} color="#34d399" />
               </div>
               <div>
-                <h2 style={{ fontSize: '1.45rem', color: '#f8fafc', fontWeight: 800, margin: 0 }}>
-                  LOG IN PAGE
+                <h2 style={{ fontSize: '1.2rem', color: '#f8fafc', fontWeight: 700, margin: 0 }}>
+                  Agricultural Stakeholder Gateways
                 </h2>
-                <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
-                  Direct Stakeholder Authentication & Zero-Trust Portal Verification
-                </p>
+                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  Click any dashboard card for instant 1-click launch
+                </span>
               </div>
             </div>
 
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                padding: '4px 10px',
+                borderRadius: '8px',
+                fontSize: '0.73rem',
+                color: '#34d399',
+                border: '1px solid rgba(52, 211, 153, 0.25)',
+              }}
+            >
+              <Activity size={13} />
+              <span>Live Telemetry Active</span>
+            </div>
+          </div>
+
+          {/* 2-Column Grid matching the user's sketch */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+              gap: '18px',
+            }}
+          >
+            {dashboardCards.map((card) => (
+              <div
+                key={card.role}
+                className={`frontpage-card ${card.animClass}`}
+                onClick={() => handleInstantLaunch(card.role)}
+                style={
+                  {
+                    '--card-glow': card.bgGlow,
+                    '--card-accent': card.color,
+                    borderColor: card.borderColor,
+                    background: `linear-gradient(145deg, rgba(15, 23, 42, 0.9), ${card.bgGlow})`,
+                  } as React.CSSProperties
+                }
+              >
+                <div>
+                  {/* Card Top: Icon, Title, Badge */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div
+                        className="card-icon-box"
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '12px',
+                          background: 'rgba(255, 255, 255, 0.06)',
+                          border: `1px solid ${card.color}60`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {card.icon}
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '1.15rem', color: '#ffffff', marginBottom: '3px', fontWeight: 700 }}>
+                          {card.title}
+                        </h3>
+                        <span
+                          className="badge"
+                          style={{
+                            background: `${card.color}15`,
+                            color: card.color,
+                            border: `1px solid ${card.color}40`,
+                            fontSize: '0.7rem',
+                            padding: '2px 7px',
+                          }}
+                        >
+                          {card.code}
+                        </span>
+                      </div>
+                    </div>
+
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        color: card.color,
+                        background: 'rgba(0, 0, 0, 0.35)',
+                        padding: '3px 7px',
+                        borderRadius: '6px',
+                        border: `1px solid ${card.color}30`,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {card.statusTag}
+                    </span>
+                  </div>
+
+                  {/* Persona details */}
+                  <div
+                    style={{
+                      background: 'rgba(0, 0, 0, 0.35)',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      marginBottom: '12px',
+                      borderLeft: `3px solid ${card.color}`,
+                    }}
+                  >
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>
+                      {card.personaName}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                      {card.subtitle}
+                    </div>
+                  </div>
+
+                  {/* Card description */}
+                  <p style={{ fontSize: '0.81rem', color: '#94a3b8', lineHeight: 1.45, marginBottom: '16px' }}>
+                    {card.description}
+                  </p>
+                </div>
+
+                {/* Action Button */}
+                <button
+                  className="btn btn-secondary card-launch-btn"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'center',
+                    padding: '9px 12px',
+                    fontSize: '0.83rem',
+                    borderColor: `${card.color}50`,
+                    color: card.color,
+                    fontWeight: 700,
+                  }}
+                >
+                  <span>Launch {card.title}</span>
+                  <ArrowRight size={15} className="arrow-icon" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Login Panel + Small Compact Dataset Widget */}
+        <div className="agri-sidebar">
+          
+          {/* 1. LOGIN PANEL (In Right Side as requested) */}
+          <div
+            className="frontpage-login-box"
+            style={{
+              padding: '28px 24px',
+              border: '1px solid rgba(52, 211, 153, 0.35)',
+            }}
+          >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(56, 189, 248, 0.12)',
-                border: '1px solid rgba(56, 189, 248, 0.3)',
-                padding: '6px 14px',
-                borderRadius: '999px',
+                justifyContent: 'space-between',
+                marginBottom: '18px',
+                borderBottom: '1px solid var(--border-glass)',
+                paddingBottom: '14px',
               }}
             >
-              <Smartphone size={15} color="#38bdf8" />
-              <span style={{ fontSize: '0.78rem', color: '#38bdf8', fontWeight: 600 }}>
-                Instant OTP Verification Enabled
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    border: '1px solid rgba(52, 211, 153, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Lock size={19} color="#34d399" />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.25rem', color: '#f8fafc', fontWeight: 800, margin: 0 }}>
+                    LOG IN PORTAL
+                  </h3>
+                  <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    Kisan & Stakeholder Authentication
+                  </span>
+                </div>
+              </div>
+
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  color: '#34d399',
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  padding: '3px 8px',
+                  borderRadius: '999px',
+                  fontWeight: 600,
+                }}
+              >
+                OTP Enabled
               </span>
             </div>
-          </div>
 
-          {/* Quick Role Selection Pills */}
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: '10px' }}>
-              Select Active Stakeholder Role:
-            </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {dashboardCards.map((p) => {
-                const isSelected = selectedRole === p.role;
-                return (
-                  <button
-                    key={p.role}
-                    type="button"
-                    onClick={() => handleRoleSelect(p.role)}
-                    className={`role-pill ${isSelected ? 'active' : ''}`}
-                    style={
-                      isSelected
-                        ? {
-                            background: `${p.color}25`,
-                            borderColor: p.color,
-                            color: '#ffffff',
-                            boxShadow: `0 0 14px ${p.color}35`,
-                          }
-                        : {}
-                    }
-                  >
-                    <span>{p.title}</span>
-                  </button>
-                );
-              })}
+            {/* Role Pills */}
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: '8px' }}>
+                Select Active Role:
+              </label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {dashboardCards.map((p) => {
+                  const isSelected = selectedRole === p.role;
+                  return (
+                    <button
+                      key={p.role}
+                      type="button"
+                      onClick={() => handleRoleSelect(p.role)}
+                      className={`role-pill ${isSelected ? 'active' : ''}`}
+                      style={{
+                        padding: '6px 10px',
+                        fontSize: '0.76rem',
+                        ...(isSelected
+                          ? {
+                              background: `${p.color}25`,
+                              borderColor: p.color,
+                              color: '#ffffff',
+                              boxShadow: `0 0 10px ${p.color}30`,
+                            }
+                          : {}),
+                      }}
+                    >
+                      <span>{p.title.replace(' Dashboard', '')}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleLoginFormSubmit}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                gap: '18px',
-                marginBottom: '20px',
-              }}
-            >
-              {/* Phone / License ID */}
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
+            {/* Login Form */}
+            <form onSubmit={handleLoginFormSubmit}>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', display: 'block', marginBottom: '5px', fontWeight: 600 }}>
                   Mobile Number / APMC Trader ID
                 </label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    value={phoneOrId}
-                    onChange={(e) => setPhoneOrId(e.target.value)}
-                    placeholder="Enter registered 10-digit mobile number"
-                    className="input-field"
-                    style={{
-                      width: '100%',
-                      background: 'rgba(10, 15, 26, 0.8)',
-                      color: '#f8fafc',
-                      padding: '12px 14px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      fontSize: '0.92rem',
-                    }}
-                  />
-                </div>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
+                <input
+                  type="text"
+                  value={phoneOrId}
+                  onChange={(e) => setPhoneOrId(e.target.value)}
+                  placeholder="Enter 10-digit mobile number"
+                  className="input-field"
+                  style={{
+                    width: '100%',
+                    background: 'rgba(10, 15, 26, 0.85)',
+                    color: '#f8fafc',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    fontSize: '0.88rem',
+                  }}
+                />
+                <div style={{ fontSize: '0.71rem', color: '#94a3b8', marginTop: '4px' }}>
                   Persona: <strong style={{ color: '#f8fafc' }}>{roleDefaultCredentials[selectedRole].name}</strong>
                 </div>
               </div>
 
-              {/* OTP */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600 }}>
+              <div style={{ marginBottom: '18px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 600 }}>
                     One-Time Password (OTP)
                   </label>
-                  <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.71rem', color: '#34d399', fontWeight: 600 }}>
                     Auto-Filled: 729104
                   </span>
                 </div>
@@ -523,80 +563,209 @@ export const LoginPortal: React.FC = () => {
                   type="text"
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="Enter 6-digit OTP"
+                  placeholder="6-digit OTP"
                   className="input-field"
                   style={{
                     width: '100%',
-                    background: 'rgba(10, 15, 26, 0.8)',
+                    background: 'rgba(10, 15, 26, 0.85)',
                     color: '#34d399',
-                    padding: '12px 14px',
+                    padding: '10px 12px',
                     borderRadius: '8px',
                     border: '1px solid rgba(52, 211, 153, 0.4)',
-                    fontSize: '1.1rem',
+                    fontSize: '1rem',
                     fontWeight: 700,
                     letterSpacing: '3px',
                     textAlign: 'center',
                   }}
                 />
               </div>
-            </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="btn btn-primary"
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 18px rgba(16, 185, 129, 0.35)',
+                }}
+              >
+                <KeyRound size={17} />
+                <span>Verify & Launch Portal</span>
+                <ArrowRight size={16} />
+              </button>
+            </form>
+
+            <div
               style={{
-                width: '100%',
-                padding: '14px',
-                fontSize: '1rem',
-                fontWeight: 700,
-                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '10px',
-                boxShadow: '0 6px 25px rgba(16, 185, 129, 0.35)',
+                gap: '12px',
+                marginTop: '14px',
+                fontSize: '0.72rem',
+                color: 'var(--text-dim)',
               }}
             >
-              <KeyRound size={20} />
-              <span>Verify & Launch {dashboardCards.find((c) => c.role === selectedRole)?.title}</span>
-              <ArrowRight size={18} />
-            </button>
-          </form>
-
-          {/* Trust & Compliance badges */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              gap: '20px',
-              marginTop: '22px',
-              paddingTop: '16px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-              fontSize: '0.76rem',
-              color: 'var(--text-dim)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CheckCircle2 size={14} color="#34d399" />
-              <span>DPDP Act 2023 Compliant</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CheckCircle2 size={14} color="#38bdf8" />
-              <span>Zero-Trust RBAC Enforced</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CheckCircle2 size={14} color="#fbbf24" />
-              <span>WDRA e-NWR Warehouse Verified</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CheckCircle2 size={14} color="#a78bfa" />
-              <span>All Data Protected & Secure</span>
+              <span>🔒 DPDP Act 2023</span>
+              <span>•</span>
+              <span>🛡️ Zero-Trust RBAC</span>
+              <span>•</span>
+              <span>🌾 Safe Data</span>
             </div>
           </div>
+
+          {/* 2. COMPACT AGRICULTURAL APMC DATASET & ACCURACY WIDGET (Small & in right) */}
+          <div className="agri-dataset-widget">
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    background: 'rgba(245, 158, 11, 0.18)',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Database size={18} color="#fbbf24" />
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '1rem', color: '#f8fafc', fontWeight: 700, margin: 0 }}>
+                    APMC Mandi Dataset
+                  </h4>
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                    Historical APMC Price & Assaying Series
+                  </span>
+                </div>
+              </div>
+
+              <span className="live-pulse-amber" />
+            </div>
+
+            {/* Accuracy Metric Card */}
+            <div
+              style={{
+                background: 'rgba(0, 0, 0, 0.4)',
+                border: '1px solid rgba(245, 158, 11, 0.25)',
+                borderRadius: '10px',
+                padding: '12px 14px',
+                marginBottom: '14px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.76rem', color: '#cbd5e1', fontWeight: 600 }}>
+                  Model Benchmark Accuracy:
+                </span>
+                <span
+                  style={{
+                    fontSize: '1.15rem',
+                    fontWeight: 800,
+                    color: '#fbbf24',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  {currentAccuracy.toFixed(1)}%
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div
+                style={{
+                  width: '100%',
+                  height: '7px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '999px',
+                  overflow: 'hidden',
+                  marginBottom: '10px',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${Math.min(100, currentAccuracy)}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #10b981, #f59e0b)',
+                    borderRadius: '999px',
+                    transition: 'width 0.6s ease',
+                  }}
+                />
+              </div>
+
+              {/* Mini Stats Chips */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', textAlign: 'center' }}>
+                <div className="agri-stat-chip">
+                  <div style={{ fontSize: '0.66rem', color: '#94a3b8' }}>MANDIS</div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f8fafc' }}>6 Yards</div>
+                </div>
+                <div className="agri-stat-chip">
+                  <div style={{ fontSize: '0.66rem', color: '#94a3b8' }}>RECORDS</div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#38bdf8' }}>2,480+</div>
+                </div>
+                <div className="agri-stat-chip">
+                  <div style={{ fontSize: '0.66rem', color: '#94a3b8' }}>CROPS</div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#34d399' }}>10 Types</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Interactive Actions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={handleQuickRunDataset}
+                disabled={isRunningDataset}
+                className="btn btn-saffron"
+                style={{
+                  width: '100%',
+                  padding: '9px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  justifyContent: 'center',
+                }}
+              >
+                {isRunningDataset ? (
+                  <>
+                    <RotateCw size={15} className="animate-spin" />
+                    <span>Evaluating APMC Dataset...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play size={15} />
+                    <span>Run Dataset & Test Accuracy</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsDatasetModalOpen(true)}
+                className="btn btn-secondary"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  fontSize: '0.78rem',
+                  justifyContent: 'center',
+                  borderColor: 'rgba(255, 255, 255, 0.12)',
+                  color: '#cbd5e1',
+                }}
+              >
+                <Sliders size={14} />
+                <span>Open Full Dataset Explorer</span>
+              </button>
+            </div>
+          </div>
+
         </div>
+
       </div>
     </div>
   );

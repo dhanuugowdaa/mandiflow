@@ -41,6 +41,10 @@ export const AppContent: React.FC = () => {
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <NotificationToast />
         <SmsNotificationToast />
+        <RunDatasetModal
+          isOpen={isDatasetModalOpen}
+          onClose={() => setIsDatasetModalOpen(false)}
+        />
         <LoginPortal />
       </div>
     );
