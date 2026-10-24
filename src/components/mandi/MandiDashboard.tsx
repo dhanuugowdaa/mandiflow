@@ -12,6 +12,7 @@ import {
   Truck,
   RotateCcw,
 } from 'lucide-react';
+import { ApmcConfirmationModal } from '../common/ApmcConfirmationModal';
 
 export const MandiDashboard: React.FC = () => {
   const {
@@ -20,6 +21,7 @@ export const MandiDashboard: React.FC = () => {
     commissionRate,
     mandiCess,
     userSession,
+    pendingApmcConfirmations,
   } = useApp();
 
   const [selectedPassId, setSelectedPassId] = useState<string>(gateWeighments[0]?.gatePassId || '');
@@ -85,6 +87,31 @@ export const MandiDashboard: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Inbound Farmer Dispatch Confirmation Box (APMC Acceptance Gate) */}
+      {pendingApmcConfirmations.length > 0 && (
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <span
+              style={{
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                background: '#f43f5e',
+                boxShadow: '0 0 10px #f43f5e',
+              }}
+            />
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+              Incoming Farmer Dispatches Requiring APMC Acceptance ({pendingApmcConfirmations.length})
+            </h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {pendingApmcConfirmations.map((p) => (
+              <ApmcConfirmationModal key={p.id} pledge={p} isEmbedded={true} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 4 Inbound Operational Cards */}
       <div

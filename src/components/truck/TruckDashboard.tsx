@@ -15,6 +15,9 @@ import {
   MapPin,
   Clock,
   Radio,
+  Phone,
+  Sprout,
+  CheckCheck,
 } from 'lucide-react';
 import { FlipkartDeliveryTracker } from '../common/FlipkartDeliveryTracker';
 
@@ -24,6 +27,7 @@ export const TruckDashboard: React.FC = () => {
     toggleReeferFault,
     advanceTruckMilestone,
     signTruckEpod,
+    confirmTruckCargoLoaded,
     userSession,
   } = useApp();
 
@@ -75,6 +79,160 @@ export const TruckDashboard: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* APMC Connected Farm Collection Mission (Active Driver Flow) */}
+      {truckTelemetry.collectionStatus === 'EN_ROUTE_PICKUP' ? (
+        <div
+          style={{
+            background: 'linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.95))',
+            border: '1px solid rgba(52, 211, 153, 0.4)',
+            boxShadow: '0 12px 35px -8px rgba(0, 0, 0, 0.6), 0 0 25px -5px rgba(16, 185, 129, 0.25)',
+            borderRadius: '16px',
+            padding: '22px 26px',
+            marginBottom: '28px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  background: 'rgba(16, 185, 129, 0.2)',
+                  border: '1px solid rgba(52, 211, 153, 0.5)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Sprout size={22} color="#34d399" />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="live-pulse" />
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                    Connected to Farmer for Produce Collection
+                  </h3>
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '999px',
+                      background: 'rgba(16, 185, 129, 0.2)',
+                      border: '1px solid rgba(16, 185, 129, 0.4)',
+                      color: '#34d399',
+                    }}
+                  >
+                    APMC ACCEPTED
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '3px 0 0 0' }}>
+                  APMC Mandi Yard has accepted farmer dispatch. Driver Sukhdev Singh is connected and en route to collect harvest.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <a
+                href={`tel:${truckTelemetry.assignedFarmerPhone || '+919823144021'}`}
+                className="btn btn-secondary"
+                style={{
+                  fontSize: '0.82rem',
+                  padding: '9px 14px',
+                  borderColor: 'rgba(56, 189, 248, 0.4)',
+                  color: '#38bdf8',
+                  textDecoration: 'none',
+                }}
+              >
+                <Phone size={15} />
+                <span>Call Farmer ({truckTelemetry.assignedFarmerPhone || '+91 98231 44021'})</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => confirmTruckCargoLoaded(truckTelemetry.assignedPledgeId)}
+                className="btn btn-primary"
+                style={{
+                  fontSize: '0.85rem',
+                  padding: '9px 18px',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)',
+                }}
+              >
+                <CheckCircle2 size={16} />
+                <span>Confirm Cargo Loaded & Seal Reefer ➔ Head to APMC</span>
+              </button>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '12px',
+              background: 'rgba(0, 0, 0, 0.35)',
+              padding: '14px',
+              borderRadius: '10px',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+            }}
+          >
+            <div>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>FARMER / CONTACT</span>
+              <strong style={{ fontSize: '0.92rem', color: '#f8fafc' }}>
+                {truckTelemetry.assignedFarmerName || 'Rameshwar Patil'}
+              </strong>
+            </div>
+            <div>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>COLLECTION PICKUP</span>
+              <strong style={{ fontSize: '0.92rem', color: '#38bdf8' }}>
+                {truckTelemetry.pickupVillage || 'Pimpalgaon Baswant, Nashik'}
+              </strong>
+            </div>
+            <div>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>HARVEST CARGO</span>
+              <strong style={{ fontSize: '0.92rem', color: '#34d399' }}>
+                {truckTelemetry.assignedQuantityQuintals || 42} Q {truckTelemetry.assignedCommodity || 'Tomato (Hybrid)'}
+              </strong>
+            </div>
+            <div>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>DESTINATION MANDI</span>
+              <strong style={{ fontSize: '0.92rem', color: '#fbbf24' }}>
+                Azadpur APMC Fruit & Vegetable Yard (Bay #04)
+              </strong>
+            </div>
+          </div>
+        </div>
+      ) : truckTelemetry.collectionStatus === 'TRANSIT_TO_APMC' ? (
+        <div
+          style={{
+            background: 'rgba(56, 189, 248, 0.1)',
+            border: '1px solid rgba(56, 189, 248, 0.35)',
+            borderRadius: '12px',
+            padding: '14px 20px',
+            marginBottom: '28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '10px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCheck size={20} color="#38bdf8" />
+            <div>
+              <strong style={{ color: '#f8fafc', fontSize: '0.92rem' }}>
+                Cargo Collected & Chamber Temperature Sealed (11.8°C)
+              </strong>
+              <span style={{ color: '#94a3b8', fontSize: '0.78rem', display: 'block' }}>
+                En route to Azadpur APMC Mandi Weighbridge Bay 4 with {truckTelemetry.assignedQuantityQuintals || 42} Q {truckTelemetry.assignedCommodity || 'Tomato'}.
+              </span>
+            </div>
+          </div>
+          <span className="badge badge-sky">IN TRANSIT TO APMC</span>
+        </div>
+      ) : null}
 
       {/* Flipkart Style Consignment Route & Delivery Tracker (Driver View) */}
       <div style={{ marginBottom: '28px' }}>

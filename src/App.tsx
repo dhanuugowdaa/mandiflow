@@ -19,6 +19,7 @@ import { FlipkartDeliveryTracker } from './components/common/FlipkartDeliveryTra
 import { WeatherFreshnessGuardModal } from './components/common/WeatherFreshnessGuardModal';
 import { OrderHistoryStatementModal } from './components/common/OrderHistoryStatementModal';
 import { RunDatasetModal } from './components/common/RunDatasetModal';
+import { ApmcConfirmationModal } from './components/common/ApmcConfirmationModal';
 
 export const AppContent: React.FC = () => {
   const {
@@ -33,6 +34,7 @@ export const AppContent: React.FC = () => {
     setIsOrderHistoryModalOpen,
     isDatasetModalOpen,
     setIsDatasetModalOpen,
+    activeApmcConfirmationModal,
   } = useApp();
 
   // If user is not logged in or has no active role, show Login Portal!
@@ -83,6 +85,7 @@ export const AppContent: React.FC = () => {
           onClose={() => setIsDeliveryTrackerModalOpen(false)}
         />
       )}
+      {activeApmcConfirmationModal && <ApmcConfirmationModal />}
       <Navbar />
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>

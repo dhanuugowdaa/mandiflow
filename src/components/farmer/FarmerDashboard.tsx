@@ -53,6 +53,7 @@ export const FarmerDashboard: React.FC = () => {
     setIsDeliveryTrackerModalOpen,
     setIsDatasetModalOpen,
     datasetRunResult,
+    setActiveApmcConfirmationModal,
   } = useApp();
 
   // New Pledge Form State
@@ -148,6 +149,59 @@ export const FarmerDashboard: React.FC = () => {
         return <span className="badge badge-indigo">Draft</span>;
       case 'PLEDGED':
         return <span className="badge badge-sky">Reported Lot</span>;
+      case 'AWAITING_APMC_CONFIRMATION':
+        return (
+          <span
+            className="badge"
+            style={{
+              background: 'rgba(244, 63, 94, 0.18)',
+              color: '#fb7185',
+              border: '1px solid rgba(244, 63, 94, 0.5)',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+          >
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f43f5e', display: 'inline-block' }} />
+            Awaiting APMC Acceptance
+          </span>
+        );
+      case 'APMC_ACCEPTED':
+      case 'TRUCK_EN_ROUTE_PICKUP':
+        return (
+          <span
+            className="badge"
+            style={{
+              background: 'rgba(16, 185, 129, 0.22)',
+              color: '#34d399',
+              border: '1px solid rgba(16, 185, 129, 0.6)',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+          >
+            🚚 Truck Driver Connected & En Route
+          </span>
+        );
+      case 'COLLECTED_LOADED':
+        return (
+          <span
+            className="badge"
+            style={{
+              background: 'rgba(56, 189, 248, 0.22)',
+              color: '#38bdf8',
+              border: '1px solid rgba(56, 189, 248, 0.6)',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+          >
+            ❄️ Harvest Loaded in Reefer
+          </span>
+        );
       case 'READY_TO_SELL':
         return (
           <span
@@ -1794,10 +1848,86 @@ export const FarmerDashboard: React.FC = () => {
                   <td style={{ padding: '14px' }}>{getLifecycleBadge(p.status)}</td>
                   <td style={{ padding: '14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      {p.status === 'READY_TO_SELL' ? (
+                      {p.status === 'AWAITING_APMC_CONFIRMATION' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.74rem', color: '#fb7185', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Clock size={13} color="#fb7185" /> Sent to APMC
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setActiveApmcConfirmationModal(p)}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              background: 'rgba(244, 63, 94, 0.15)',
+                              border: '1px solid rgba(244, 63, 94, 0.4)',
+                              color: '#fb7185',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                            }}
+                            title="Open APMC Confirmation Box"
+                          >
+                            Review APMC Box
+                          </button>
+                        </div>
+                      ) : p.status === 'TRUCK_EN_ROUTE_PICKUP' || p.status === 'APMC_ACCEPTED' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={13} color="#34d399" /> APMC Approved
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: '#a78bfa' }}>
+                            Driver: Sukhdev Singh
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTrackingModalPledge(p);
+                              setIsDeliveryTrackerModalOpen(true);
+                            }}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              background: 'rgba(16, 185, 129, 0.15)',
+                              border: '1px solid rgba(16, 185, 129, 0.4)',
+                              color: '#34d399',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            🚚 Track Pickup
+                          </button>
+                        </div>
+                      ) : p.status === 'COLLECTED_LOADED' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 700 }}>
+                            ❄️ Loaded in Reefer
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTrackingModalPledge(p);
+                              setIsDeliveryTrackerModalOpen(true);
+                            }}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              background: 'rgba(56, 189, 248, 0.15)',
+                              border: '1px solid rgba(56, 189, 248, 0.4)',
+                              color: '#38bdf8',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            🚚 Track Delivery
+                          </button>
+                        </div>
+                      ) : p.status === 'READY_TO_SELL' ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <CheckCheck size={14} color="#34d399" /> SMS Sent
+                            <CheckCheck size={14} color="#34d399" /> Dispatched
                           </span>
                           <button
                             type="button"
@@ -1812,9 +1942,9 @@ export const FarmerDashboard: React.FC = () => {
                               fontWeight: 600,
                               cursor: 'pointer',
                             }}
-                            title="Resend Kisan SMS"
+                            title="Resend to APMC"
                           >
-                            Resend SMS
+                            Resend to APMC
                           </button>
                         </div>
                       ) : p.status === 'PLEDGED' || p.status === 'MATCHED' ? (
@@ -1837,7 +1967,7 @@ export const FarmerDashboard: React.FC = () => {
                           }}
                         >
                           <Bell size={13} />
-                          <span>Mark Ready to Sell & Send SMS</span>
+                          <span>Dispatch to APMC Mandi</span>
                         </button>
                       ) : (
                         <span style={{ fontSize: '0.74rem', color: 'var(--text-dim)' }}>

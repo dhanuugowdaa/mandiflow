@@ -17,6 +17,7 @@ import {
   UserHistoryStatement,
   DatasetAlgorithm,
   DatasetRunResult,
+  LifecycleState,
 } from '../types';
 import { executeDatasetRun } from '../services/enamModelTrainer';
 import {
@@ -186,6 +187,12 @@ interface AppContextType {
   // APMC Mandi State
   gateWeighments: MandiGateWeighment[];
   commitWeighment: (gatePassId: string, grossKg: number, tareKg: number) => void;
+  pendingApmcConfirmations: FarmerPledge[];
+  activeApmcConfirmationModal: FarmerPledge | null;
+  setActiveApmcConfirmationModal: (pledge: FarmerPledge | null) => void;
+  acceptApmcDispatch: (pledgeId: string) => void;
+  rejectApmcDispatch: (pledgeId: string, reason?: string) => void;
+  confirmTruckCargoLoaded: (pledgeId?: string) => void;
 
   // Truck Logistics State
   truckTelemetry: TruckTelemetry;
@@ -282,6 +289,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [coalitions, setCoalitions] = useState<FpoCoalition[]>(INITIAL_COALITIONS);
   const [enamLots, setEnamLots] = useState<EnamAuctionLot[]>(INITIAL_ENAM_LOTS);
   const [gateWeighments, setGateWeighments] = useState<MandiGateWeighment[]>(INITIAL_GATE_WEIGHMENTS);
+  const [pendingApmcConfirmations, setPendingApmcConfirmations] = useState<FarmerPledge[]>(() => {
+    return INITIAL_FARMER_PLEDGES.filter((p) => p.status === 'AWAITING_APMC_CONFIRMATION');
+  });
+  const [activeApmcConfirmationModal, setActiveApmcConfirmationModal] = useState<FarmerPledge | null>(null);
   const [truckTelemetry, setTruckTelemetry] = useState<TruckTelemetry>(INITIAL_TRUCK_TELEMETRY);
   const [auditLogs, setAuditLogs] = useState<AdminAuditRecord[]>(INITIAL_AUDIT_LOGS);
 
@@ -526,8 +537,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const coalitionFreight = qtyQ * 98;
     const savingsPercent = Math.round(((soloFreight - coalitionFreight) / soloFreight) * 1000) / 10;
 
-    const isImmediateReady = Boolean(pledgeData.isReadyToSell || pledgeData.status === 'READY_TO_SELL');
-    const initialStatus = isImmediateReady ? 'READY_TO_SELL' : 'PLEDGED';
+    const isImmediateReady = Boolean(pledgeData.isReadyToSell || pledgeData.status === 'READY_TO_SELL' || pledgeData.status === 'AWAITING_APMC_CONFIRMATION');
+    const initialStatus: LifecycleState = isImmediateReady ? 'AWAITING_APMC_CONFIRMATION' : 'PLEDGED';
 
     const newPledge: FarmerPledge = {
       id: newId,
@@ -562,8 +573,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     if (isImmediateReady) {
+      setPendingApmcConfirmations((prev) => [newPledge, ...prev]);
+      setActiveApmcConfirmationModal(newPledge);
+
       playSmsNotificationChime();
-      const smsMessage = `[MandiFlow / e-NAM Alert] Dear ${newPledge.farmerName}, your reported quantity of ${newPledge.quantityQuintals} Quintals of ${newPledge.commodity} is now READY TO SELL! Expected clearing price: ₹${newPledge.expectedRealizationPerQ.toLocaleString()}/Q. Reefer collection truck assigned at ${newPledge.locationVillage} Hub.`;
+      const smsMessage = `[MandiFlow / e-NAM Alert] Dear ${newPledge.farmerName}, your harvest of ${newPledge.quantityQuintals} Quintals of ${newPledge.commodity} has been dispatched to APMC Mandi Yard! Awaiting APMC confirmation box clearance. Reefer truck will connect immediately upon APMC approval.`;
       const smsRecord: SmsAlertRecord = {
         id: 'sms-' + Date.now(),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
@@ -571,7 +585,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         recipientName: newPledge.farmerName,
         category: 'READY_TO_SELL',
         message: smsMessage,
-        provider: 'Fast2SMS / Sandbox',
+        provider: 'Fast2SMS / APMC Inbound Gateway',
         lotId: newPledge.id,
         commodity: newPledge.commodity,
         quantityQuintals: newPledge.quantityQuintals,
@@ -581,8 +595,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       addToast(
         'success',
-        'Crop Registered & Ready to Sell 📱',
-        `SMS alert sent to ${newPledge.farmerPhone}: "${newPledge.quantityQuintals} Q of ${newPledge.commodity} is READY TO SELL!"`
+        'Dispatched to APMC Mandi Yard 🌾',
+        `Awaiting APMC Yard confirmation box approval. Reefer truck will connect automatically once accepted.`
       );
     } else {
       addToast(
@@ -603,10 +617,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetPledge = pledges.find((p) => p.id === pledgeId);
     if (!targetPledge) return;
 
+    const updatedPledge: FarmerPledge = {
+      ...targetPledge,
+      status: 'AWAITING_APMC_CONFIRMATION',
+    };
+
     // 1. Optimistic local update
     setPledges((prev) =>
-      prev.map((p) => (p.id === pledgeId ? { ...p, status: 'READY_TO_SELL' } : p))
+      prev.map((p) => (p.id === pledgeId ? updatedPledge : p))
     );
+    setPendingApmcConfirmations((prev) => [updatedPledge, ...prev.filter((p) => p.id !== pledgeId)]);
+    setActiveApmcConfirmationModal(updatedPledge);
 
     // 2. Play phone SMS chime
     playSmsNotificationChime();
@@ -624,7 +645,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const smsMessage =
       res?.smsResult?.messageText ||
-      `[MandiFlow / e-NAM Alert] Dear ${targetPledge.farmerName}, your reported quantity of ${targetPledge.quantityQuintals} Quintals of ${targetPledge.commodity} is now READY TO SELL! Expected clearing price: ₹${targetPledge.expectedRealizationPerQ.toLocaleString()}/Q. Reefer collection truck assigned at ${targetPledge.locationVillage} Hub.`;
+      `[MandiFlow / e-NAM Alert] Dear ${targetPledge.farmerName}, your lot of ${targetPledge.quantityQuintals} Quintals of ${targetPledge.commodity} has been dispatched to APMC Mandi Yard! Awaiting APMC confirmation box clearance. Reefer truck will connect immediately upon APMC approval.`;
 
     const smsRecord: SmsAlertRecord = {
       id: 'sms-' + Date.now(),
@@ -633,7 +654,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recipientName: targetPledge.farmerName,
       category: 'READY_TO_SELL',
       message: smsMessage,
-      provider: res?.smsResult?.provider || 'Fast2SMS / Sandbox',
+      provider: res?.smsResult?.provider || 'Fast2SMS / APMC Inbound Gateway',
       lotId: targetPledge.id,
       commodity: targetPledge.commodity,
       quantityQuintals: targetPledge.quantityQuintals,
@@ -650,14 +671,181 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     addToast(
       'success',
-      'SMS Alert Dispatched 📱',
-      `Sent to ${targetPledge.farmerPhone}: "${targetPledge.quantityQuintals} Q of ${targetPledge.commodity} is READY TO SELL!"`
+      'Sent to APMC Mandi for Acceptance 🌾',
+      `Inbound confirmation box notified to APMC Yard! Reefer truck connects automatically once accepted.`
     );
 
     addAuditLog(
-      'SMS_ALERT_DISPATCHED',
-      `Kisan SMS dispatched to +91 ${targetPledge.farmerPhone} (${targetPledge.farmerName}): Lot ${targetPledge.id} marked READY TO SELL.`,
+      'DISPATCH_SENT_TO_APMC',
+      `Farmer ${targetPledge.farmerName} dispatched lot ${targetPledge.id} (${targetPledge.commodity}, ${targetPledge.quantityQuintals} Q) to APMC Mandi Yard. Awaiting confirmation.`,
       'DPDP_ACT_2023'
+    );
+  };
+
+  // APMC Yard Confirmation Actions
+  const acceptApmcDispatch = (pledgeId: string) => {
+    const target = pledges.find((p) => p.id === pledgeId);
+    if (!target) return;
+
+    const acceptedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // 1. Update pledge state
+    const updatedPledge: FarmerPledge = {
+      ...target,
+      status: 'TRUCK_EN_ROUTE_PICKUP',
+      apmcAcceptedAt: acceptedTime,
+      assignedTruckDriverName: 'Sukhdev Singh',
+      assignedTruckDriverPhone: '+91 97180 55412',
+      assignedTruckPlate: 'MH-15-EG-8921',
+    };
+
+    setPledges((prev) => prev.map((p) => (p.id === pledgeId ? updatedPledge : p)));
+    setPendingApmcConfirmations((prev) => prev.filter((p) => p.id !== pledgeId));
+    setActiveApmcConfirmationModal(null);
+
+    // 2. Pre-register Gate Pass at APMC Mandi Weighbridge
+    const newGatePass: MandiGateWeighment = {
+      gatePassId: `GP-AZP-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      vehicleNumber: 'MH-15-EG-8921',
+      transporterName: 'Kisan Rath Cold Fleet',
+      driverName: 'Sukhdev Singh',
+      driverPhone: '+91 97180 55412',
+      commodity: target.commodity,
+      expectedWeightKg: target.quantityKg,
+      grossWeightKg: target.quantityKg + 6240,
+      tareWeightKg: 6240,
+      actualNetWeightKg: target.quantityKg,
+      discrepancyKg: 0,
+      discrepancyPercent: 0,
+      discrepancyStatus: 'TOLERANCE_PASS',
+      arhatiyaName: 'M/s Azadpur Central Assayers (Shop #12)',
+      commissionRatePercent: commissionRate,
+      mandiCessPercent: mandiCess,
+      entryTimestamp: `${new Date().toISOString().slice(0, 10)} ${acceptedTime}`,
+      status: 'PENDING_WEIGHMENT',
+    };
+    setGateWeighments((prev) => [newGatePass, ...prev]);
+
+    // 3. Connect Truck Driver!
+    setTruckTelemetry((prev) => ({
+      ...prev,
+      collectionStatus: 'EN_ROUTE_PICKUP',
+      assignedFarmerName: target.farmerName,
+      assignedFarmerPhone: target.farmerPhone,
+      assignedCommodity: target.commodity,
+      assignedQuantityQuintals: target.quantityQuintals,
+      assignedPledgeId: target.id,
+      pickupVillage: target.locationVillage,
+      routeOrigin: `${target.farmerName}'s Farm, ${target.locationVillage}`,
+      routeDestination: 'Azadpur APMC Mandi Yard (Bay #04)',
+      distanceCoveredKm: 15,
+      isLiveTrackingActive: true,
+      milestones: [
+        { name: 'Farmer Harvest Pledged & Ready to Sell', completed: true, timestamp: 'Today' },
+        { name: 'APMC Mandi Clearance Confirmed & Gate Bay 4 Assigned', completed: true, timestamp: acceptedTime },
+        { name: `Reefer Truck Connected & En Route to ${target.farmerName}`, completed: false, timestamp: 'Now En Route' },
+        { name: 'Farm Arrival & Reefer Chamber Sealing (12.0°C)', completed: false },
+        { name: 'Transit to Azadpur APMC Weighbridge Bay 4', completed: false },
+      ],
+    }));
+
+    // 4. SMS Alert
+    playSmsNotificationChime();
+    const smsMessage = `[MandiFlow / APMC Alert] Dear ${target.farmerName}, APMC Azadpur Yard has ACCEPTED your lot! Reefer Truck TRK-8921 (Driver: Sukhdev Singh +91 97180 55412) is CONNECTED and en route to collect your ${target.commodity} (${target.quantityQuintals} Q).`;
+    const smsRecord: SmsAlertRecord = {
+      id: 'sms-' + Date.now(),
+      timestamp: acceptedTime,
+      phoneNumber: target.farmerPhone,
+      recipientName: target.farmerName,
+      category: 'READY_TO_SELL',
+      message: smsMessage,
+      provider: 'Fast2SMS / APMC Gateway',
+      lotId: target.id,
+      commodity: target.commodity,
+      quantityQuintals: target.quantityQuintals,
+    };
+    setActiveSmsAlert(smsRecord);
+    setSmsHistory((prev) => [smsRecord, ...prev]);
+
+    // 5. Celebration & Toasts
+    confetti({
+      particleCount: 90,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+
+    addToast(
+      'success',
+      'APMC Accepted & Truck Connected 🚚',
+      `APMC Yard accepted ${target.quantityQuintals} Q ${target.commodity}. Truck Driver Sukhdev Singh (+91 97180 55412) is en route to collect from ${target.farmerName}.`
+    );
+
+    addAuditLog(
+      'APMC_DISPATCH_ACCEPTED',
+      `APMC Mandi Bay 4 accepted lot ${target.id} (${target.commodity}, ${target.quantityQuintals} Q). Reefer Truck MH-15-EG-8921 dispatched to ${target.locationVillage}.`,
+      'APMC_MODEL_ACT'
+    );
+  };
+
+  const rejectApmcDispatch = (pledgeId: string, reason = 'Quality assay re-inspection required') => {
+    const target = pledges.find((p) => p.id === pledgeId);
+    if (!target) return;
+
+    setPledges((prev) =>
+      prev.map((p) => (p.id === pledgeId ? { ...p, status: 'PLEDGED' } : p))
+    );
+    setPendingApmcConfirmations((prev) => prev.filter((p) => p.id !== pledgeId));
+    setActiveApmcConfirmationModal(null);
+
+    addToast(
+      'warning',
+      'APMC Dispatch Returned',
+      `Lot ${target.id} was not cleared by APMC Yard. Reason: ${reason}.`
+    );
+
+    addAuditLog(
+      'APMC_DISPATCH_DECLINED',
+      `APMC Yard returned dispatch for lot ${target.id}. Reason: ${reason}.`,
+      'APMC_MODEL_ACT'
+    );
+  };
+
+  const confirmTruckCargoLoaded = (pledgeId?: string) => {
+    setTruckTelemetry((prev) => ({
+      ...prev,
+      collectionStatus: 'TRANSIT_TO_APMC',
+      distanceCoveredKm: 210,
+      reeferStatus: 'COOLING_OPTIMAL',
+      chamberTempC: 11.8,
+      milestones: prev.milestones.map((m, idx) =>
+        idx <= 3 ? { ...m, completed: true, timestamp: idx === 3 ? 'Just Now' : m.timestamp } : m
+      ),
+    }));
+
+    setPledges((prev) =>
+      prev.map((p) =>
+        (!pledgeId || p.id === pledgeId) && (p.status === 'TRUCK_EN_ROUTE_PICKUP' || p.status === 'APMC_ACCEPTED')
+          ? { ...p, status: 'COLLECTED_LOADED' }
+          : p
+      )
+    );
+
+    confetti({
+      particleCount: 80,
+      spread: 60,
+      origin: { y: 0.6 },
+    });
+
+    addToast(
+      'success',
+      'Cargo Loaded & Sealed ❄️',
+      'Harvest loaded into 16T Reefer Chamber at 11.8°C. Truck in transit to APMC Mandi Yard via NH-48.'
+    );
+
+    addAuditLog(
+      'REEFER_CARGO_LOADED',
+      `Driver Sukhdev Singh confirmed harvest loaded & sealed at 11.8°C. Transit initiated to Azadpur APMC Mandi.`,
+      'AGMARK_STANDARDS'
     );
   };
 
@@ -1170,6 +1358,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateReservePrice,
         gateWeighments,
         commitWeighment,
+        pendingApmcConfirmations,
+        activeApmcConfirmationModal,
+        setActiveApmcConfirmationModal,
+        acceptApmcDispatch,
+        rejectApmcDispatch,
+        confirmTruckCargoLoaded,
         truckTelemetry,
         toggleReeferFault,
         advanceTruckMilestone,

@@ -168,7 +168,7 @@ export const INITIAL_FARMER_PLEDGES: FarmerPledge[] = [
     baseSli: 0.98,
     currentSli: 0.89,
     tempExposureC: 18.5,
-    status: 'ALLOCATED',
+    status: 'AWAITING_APMC_CONFIRMATION',
     expectedRealizationPerQ: 2640,
     freightSoloInr: 6800,
     freightCoalitionInr: 4180,

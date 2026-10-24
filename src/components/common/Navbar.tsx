@@ -39,6 +39,8 @@ export const Navbar: React.FC = () => {
     setIsWeatherModalOpen,
     setIsDatasetModalOpen,
     datasetRunResult,
+    pendingApmcConfirmations,
+    setActiveApmcConfirmationModal,
   } = useApp();
 
   const allRoleConfigs: { role: UserRole; label: string; icon: React.ReactNode; color: string }[] = [
@@ -239,6 +241,32 @@ export const Navbar: React.FC = () => {
           <span className="live-pulse" style={{ width: '7px', height: '7px', background: '#34d399' }} />
           <span>BACKEND: LIVE</span>
         </div>
+
+        {/* APMC Inbound Dispatches Pending Acceptance Badge */}
+        {pendingApmcConfirmations && pendingApmcConfirmations.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setActiveApmcConfirmationModal(pendingApmcConfirmations[0])}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              background: 'rgba(244, 63, 94, 0.15)',
+              border: '1px solid rgba(244, 63, 94, 0.5)',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              color: '#fb7185',
+              cursor: 'pointer',
+              boxShadow: '0 0 12px rgba(244, 63, 94, 0.25)',
+            }}
+            title="Incoming Farmer Dispatches Awaiting APMC Mandi Acceptance"
+          >
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f43f5e', display: 'inline-block' }} />
+            <span>APMC Inbound ({pendingApmcConfirmations.length})</span>
+          </button>
+        )}
 
         {/* User Session Badge & Security Status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>

@@ -29,6 +29,11 @@ export type LifecycleState =
   | 'DRAFT'
   | 'PLEDGED'
   | 'READY_TO_SELL'
+  | 'AWAITING_APMC_CONFIRMATION'
+  | 'APMC_ACCEPTED'
+  | 'TRUCK_ASSIGNED'
+  | 'TRUCK_EN_ROUTE_PICKUP'
+  | 'COLLECTED_LOADED'
   | 'MATCHED'
   | 'ALLOCATED'
   | 'DISPATCHED'
@@ -75,6 +80,10 @@ export interface FarmerPledge {
   assignedFpoId?: string;
   assignedCoalitionId?: string;
   assignedTruckId?: string;
+  apmcAcceptedAt?: string;
+  assignedTruckDriverName?: string;
+  assignedTruckDriverPhone?: string;
+  assignedTruckPlate?: string;
   mspCompliant: boolean;
   createdAt: string;
 }
@@ -184,6 +193,13 @@ export interface TruckTelemetry {
   fastagNextToll?: string;
   isLiveTrackingActive?: boolean;
   lastPingTimestamp?: string;
+  collectionStatus?: 'IDLE' | 'EN_ROUTE_PICKUP' | 'COLLECTED_LOADED' | 'TRANSIT_TO_APMC';
+  assignedFarmerName?: string;
+  assignedFarmerPhone?: string;
+  assignedCommodity?: string;
+  assignedQuantityQuintals?: number;
+  assignedPledgeId?: string;
+  pickupVillage?: string;
 }
 
 export interface AdminAuditRecord {
