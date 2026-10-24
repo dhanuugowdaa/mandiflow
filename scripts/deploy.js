@@ -19,9 +19,11 @@ try {
   // Copy dist contents to temp dir
   fs.cpSync('dist', tempDir, { recursive: true });
 
+  const remoteUrl = execSync('git remote get-url origin').toString().trim();
   execSync('git init -b gh-pages', { cwd: tempDir, stdio: 'ignore' });
   execSync('git config user.name "dhanuu"', { cwd: tempDir, stdio: 'ignore' });
   execSync('git config user.email "shrustigowdaa@gmail.com"', { cwd: tempDir, stdio: 'ignore' });
+  execSync(`git remote add origin ${remoteUrl}`, { cwd: tempDir, stdio: 'ignore' });
   execSync('git add -A', { cwd: tempDir, stdio: 'ignore' });
   execSync('git commit -m "Deploy production bundle to gh-pages"', { cwd: tempDir, stdio: 'ignore' });
   execSync('git push origin gh-pages --force', { cwd: tempDir, stdio: 'inherit' });
